@@ -1,16 +1,14 @@
-#Made from MissJuliaBOT Updater
-
-from anie.event import register
+from julia.events import register
 from os import remove, execle, path, environ
 import asyncio
 import sys
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 import heroku3
-from anie import OWNER_ID, update, UPSTREAM_REPO_URL
+from julia import OWNER_ID, tbot, UPSTREAM_REPO_URL
 
 
-# UPSTREAM_REPO_URL = "https://github.com/Amarnathcdj/LEGEND-ROBOT-1"
+# UPSTREAM_REPO_URL = "https://github.com/MissJuliaRobot/MissJuliaRobot.git"
 HEROKU_APP_NAME = None
 HEROKU_API_KEY = None
 
@@ -76,12 +74,12 @@ async def upstream(ups):
         origin = repo.create_remote("upstream", off_repo)
         origin.fetch()
         force_update = True
-        repo.create_head("main", origin.refs.main)
-        repo.heads.main.set_tracking_branch(origin.refs.main)
-        repo.heads.main.checkout(True)
+        repo.create_head("master", origin.refs.master)
+        repo.heads.master.set_tracking_branch(origin.refs.master)
+        repo.heads.master.checkout(True)
 
     ac_br = repo.active_branch.name
-    if ac_br != "main":
+    if ac_br != "master":
         await lol.edit(
             f"**[UPDATER]:**` Looks like you are using your own custom branch ({ac_br}). "
             "in that case, Updater is unable to identify "
@@ -115,7 +113,7 @@ async def upstream(ups):
             file = open("output.txt", "w+")
             file.write(changelog_str)
             file.close()
-            await update.send_file(
+            await tbot.send_file(
                 ups.chat_id,
                 "output.txt",
                 reply_to=ups.id,
@@ -127,7 +125,7 @@ async def upstream(ups):
         return
 
     if force_update:
-        await lol.edit("`Force-Syncing to latest main bot code, please wait...`")
+        await lol.edit("`Force-Syncing to latest master bot code, please wait...`")
     else:
         await lol.edit("`Still Running ....`")
 
@@ -166,7 +164,7 @@ async def upstream(ups):
         else:
             remote = repo.create_remote("heroku", heroku_git_url)
         try:
-            remote.push(refspec="HEAD:refs/heads/main", force=True)
+            remote.push(refspec="HEAD:refs/heads/master", force=True)
         except GitCommandError as error:
             await lol.edit(f"{txt}\n`Here is the error log:\n{error}`")
             repo.__del__()
@@ -179,6 +177,6 @@ async def upstream(ups):
             repo.git.reset("--hard", "FETCH_HEAD")
         reqs_upgrade = await updateme_requirements()
         await lol.edit("`Successfully Updated!\n" "restarting......`")
-        args = [sys.executable, "-m", "anie"]
+        args = [sys.executable, "-m", "julia"]
         execle(sys.executable, *args, environ)
         return
